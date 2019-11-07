@@ -9,6 +9,50 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Problem 1
+
+```{r}
+library(tidyverse)
+
+set.seed(10)
+
+iris_with_missing = iris %>% 
+  map_df(~replace(.x, sample(1:150, 20), NA)) %>%
+  mutate(Species = as.character(Species))
+```
+
+**The fuction**
+
+```{r}
+fill_missing = function(x) {
+  
+  if (!is.numeric(x)) {
+    x[is.na(x)] = "virginica"
+  }
+  
+  x[is.na(x)] = mean(x, na.rm = TRUE)
+  
+  x
+  
+}
+```
+
+**Apply the fuction**
+
+```{r}
+output = map_dfr(iris_with_missing, fill_missing)
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
 
