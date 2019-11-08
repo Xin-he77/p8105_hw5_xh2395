@@ -44,6 +44,52 @@ output = map_dfr(iris_with_missing, fill_missing)
 ```
 
 
+## Problem 2
+
+**Tidy the data**
+
+```{r}
+filename_df = list.files("./data")
+
+study_df = tibble(
+  filename= list.files("./data"),
+  readin = str_c("./data/", filename_df)
+)%>%
+  mutate(
+    week_obs = map(readin, read_csv),
+    arm = substr(filename, 1, 3),
+    subject_id=substr(filename, 5, 6),
+    arm = replace(arm, arm == "con", "control"),
+    arm = replace(arm, arm == "exp", "experiment"),
+    subject_id=as.numeric(subject_id)
+  ) %>% 
+  unnest %>% 
+  select(-filename, -readin) %>% 
+  pivot_longer(
+    week_1:week_8,
+    names_to = "week",
+    names_prefix = "week_",
+    values_to = "observation"
+  ) %>% 
+  mutate(week = as.numeric(week))
+```
+
+**Spaghetti plot**
+
+```{r}
+study_df %>% 
+  mutate(subject_id = as.character(subject_id)) %>% 
+  ggplot(aes(x = week, y = observation, group = subject_id)) + 
+  geom_line(aes(color = subject_id)) +
+  facet_grid(. ~ arm)
+```
+
+In the experiment arm, the observation on each subject increase over time. Even though the increase is not steady, the overall trend is incresing.
+
+However, in the control arm, the observation on each subject appears no increase over time. Even though the change is not steady, the overall trend shows no increase.
+
+
+At 1st week, the observations in experiment arm are similar to the control arm. However, at 8th week, the observations in experiment arm are higher than the control arm.
 
 
 
